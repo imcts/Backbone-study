@@ -1,5 +1,6 @@
-import expect, { createSpy } from 'expect'
 import Backbone from 'backbone'
+import expect, { createSpy } from 'expect'
+import _ from 'underscore'
 
 describe('View', () => {
 	it('extend(): 뷰를 확장할 수 있습니다.', () => {
@@ -89,6 +90,24 @@ describe('View', () => {
 		expect(view.$el.html()).toEqual('Hello World')
 	})
 
+	it('template(): 템플레이트를 사용하여 화면을 갱신할 수 있습니다.', () => {
+		// Given
+		const View = Backbone.View.extend({
+			id: '#app',
+			template: _.template('<div class="_title"><%=title%></div>'),
+			render: function () {
+				this.$el.html(this.template({ title: '제목' }))
+			}
+		})
+		const view = new View()
+
+		// When
+		view.render()
+
+		// Then
+		expect(view.$('._title').text()).toEqual('제목')
+	})
+
 	it('events: 지정한 이벤트에 따라 이벤트 핸들러가 실행됩니다.', () => {
 		// Given
 		const spy = createSpy()
@@ -105,5 +124,36 @@ describe('View', () => {
 
 		// Then
 		expect(spy).toHaveBeenCalled()
+	})
+
+	it('listenTo(): 컬렉션이 변경되면 뷰가 화면을 갱신해야 합니다.', () => {
+		// Given
+		const Model = Backbone.Model.extend({
+			defaults: {	title: 'title' }
+		})
+		const Collection = Backbone.Collection.extend({
+			model: Model
+		})
+		const View = Backbone.View.extend({
+			el: '#app',
+
+			initialize: function () {
+				this.listenTo(this.collection, 'change', this.render)
+			},
+
+			render (model) {
+				this.$el.html(model.get('title'))
+			}
+		})
+		const collection = new Collection(new Model({ id: 1 }))
+		const view = new View({ collection })
+
+		// When
+		const model = collection.get(1)
+		model.set('title', '제목변경')
+		collection.set(model)
+
+		// Then
+		expect(view.$el.html()).toEqual('제목변경')
 	})
 })

@@ -42,7 +42,7 @@ describe('Collection', () => {
 		expect(spy).toHaveBeenCalled()
 	})
 
-	it('Collection()/models(): 컬렉션에 모델 목록을 전달할 수 있고, 해당 목록을 얻을 수 있습니다.', () => {
+	it('Collection()/models(): 컬렉션에 초기값으로 모델 배열을 전달할 수 있습니다.', () => {
 		// Given
 		const collection = new Backbone.Collection([
 			{ title: '제목1' },
